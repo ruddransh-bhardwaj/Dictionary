@@ -1,317 +1,655 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Intelligent Dictionary Pro</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dictionary App Pro</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-body{
-    font-family:'Segoe UI',sans-serif;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:
-    linear-gradient(135deg,#141E30,#243B55);
-    color:white;
-}
-
-.container{
-    width:95%;
-    max-width:700px;
-    padding:35px;
-    border-radius:20px;
-    backdrop-filter:blur(18px);
-    background:rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.1);
-    box-shadow:0 12px 35px rgba(0,0,0,.4);
-    animation:fadeIn .8s ease;
-}
-
-@keyframes fadeIn{
-    from{
-        opacity:0;
-        transform:translateY(25px);
-    }
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
-}
-
-h1{
-    text-align:center;
-    margin-bottom:25px;
-    color:#8ab4ff;
-    font-size:2rem;
-}
-
-.search-box{
-    display:flex;
-    gap:10px;
-}
-
-input{
-    flex:1;
-    padding:16px;
-    border:none;
-    outline:none;
-    border-radius:12px;
-    font-size:1rem;
-    background:#1f2937;
-    color:white;
-    transition:.3s;
-}
-
-input:focus{
-    box-shadow:0 0 12px #8ab4ff;
-}
-
-button{
-    padding:15px 20px;
-    border:none;
-    border-radius:12px;
-    cursor:pointer;
-    background:#8b5cf6;
-    color:white;
-    font-size:1rem;
-    transition:.3s;
-}
-
-button:hover{
-    transform:translateY(-2px);
-    background:#7c3aed;
-}
-
-.results{
-    margin-top:25px;
-    background:rgba(255,255,255,.06);
-    border-radius:15px;
-    padding:20px;
-    min-height:130px;
-    animation:fadeIn .4s ease;
-}
-
-.word{
-    font-size:2rem;
-    color:#22d3ee;
-    margin-bottom:10px;
-}
-
-.phonetic{
-    color:#9ca3af;
-    margin-bottom:15px;
-}
-
-.meaning{
-    line-height:1.7;
-    color:#f3f4f6;
-}
-
-.part{
-    color:#fbbf24;
-    margin-top:15px;
-}
-
-audio{
-    margin-top:15px;
-    width:100%;
-}
-
-.loading{
-    text-align:center;
-    color:#8ab4ff;
-    animation:pulse 1s infinite;
-}
-
-@keyframes pulse{
-    0%{opacity:.4}
-    50%{opacity:1}
-    100%{opacity:.4}
-}
-
-.history{
-    margin-top:20px;
-}
-
-.history span{
-    display:inline-block;
-    background:#374151;
-    padding:8px 12px;
-    border-radius:20px;
-    margin:5px;
-    cursor:pointer;
-    transition:.3s;
-}
-
-.history span:hover{
-    background:#4b5563;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<h1>📖 Intelligent Dictionary Pro</h1>
-
-<div class="search-box">
-    <input
-        type="text"
-        id="wordInput"
-        placeholder="Search any English word..."
-        onkeypress="handleEnter(event)">
-    <button onclick="searchWord()">Search</button>
-</div>
-
-<div class="results" id="result">
-    Type a word to begin...
-</div>
-
-<div class="history">
-    <h3>Recent Searches</h3>
-    <div id="history"></div>
-</div>
-
-</div>
-
-<script>
-
-const result=document.getElementById("result");
-const historyBox=document.getElementById("history");
-
-let history=[];
-
-function handleEnter(e){
-    if(e.key==="Enter"){
-        searchWord();
-    }
-}
-
-async function searchWord(customWord){
-
-    const input=document.getElementById("wordInput");
-    const word=(customWord || input.value).trim();
-
-    if(!word){
-        return;
-    }
-
-    result.innerHTML=
-    `<div class="loading">Searching...</div>`;
-
-    try{
-
-        const res=
-        await fetch(
-        `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-
-        if(!res.ok){
-            throw new Error();
+    <style>
+        :root {
+            /* Dark Mode (Default) */
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent: #2dd4bf;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --radius: 16px;
+            --transition: all 0.2s ease;
+            --base-font-size: 16px;
         }
 
-        const data=await res.json();
-        const entry=data[0];
+        /* Light Mode Variables */
+        body.light-mode {
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-input: #f1f5f9;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: rgba(0, 0, 0, 0.1);
+            background-image: radial-gradient(circle at top right, #ffffff, #f1f5f9);
+        }
 
-        const wordName=entry.word;
-        const phonetic=
-        entry.phonetic || "No phonetic";
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        const meaning=
-        entry.meanings[0];
+        body {
+            font-family: 'Inter', sans-serif;
+            font-size: var(--base-font-size);
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
+            transition: background-color 0.3s, color 0.3s;
+        }
 
-        const part=
-        meaning.partOfSpeech;
+        .app-container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
 
-        const definition=
-        meaning.definitions[0].definition;
+        /* Settings Bar */
+        .settings-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
 
-        const example=
-        meaning.definitions[0].example ||
-        "No example available";
+        .settings-btn {
+            background: rgba(128, 128, 128, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
 
-        let audio="";
+        .settings-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
 
-        if(entry.phonetics){
-            for(let p of entry.phonetics){
-                if(p.audio){
-                    audio=p.audio;
-                    break;
-                }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+        }
+
+        .search-wrapper {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 45px 16px 20px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+
+        input::placeholder { color: var(--text-muted); }
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: none;
+        }
+        
+        .clear-btn:hover { color: var(--text-main); }
+
+        button.primary-btn {
+            padding: 0 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            height: 52px;
+        }
+
+        button.secondary-btn {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        button.primary-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        button.secondary-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .results-section {
+            min-height: 150px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 25px;
+        }
+
+        .empty-state, .loading-state, .error-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px 0;
+            font-weight: 300;
+        }
+
+        .word-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .word-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .word-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -1px;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: rgba(128, 128, 128, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .icon-btn:hover, .icon-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .phonetic {
+            color: var(--accent);
+            font-family: monospace;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-phonetics-btn {
+            font-size: 0.75rem;
+            background: none;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .part-of-speech {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+            text-transform: lowercase;
+        }
+
+        .definition {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+
+        .example {
+            border-left: 3px solid var(--border-color);
+            padding-left: 12px;
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .history-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .history-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .text-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .text-btn:hover { color: #f87171; }
+
+        .history-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tag:hover {
+            border-color: var(--text-muted);
+            color: var(--text-main);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: #0f172a;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .animate-pulse { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    </style>
+</head>
+<body>
+
+    <main class="app-container">
+        <div class="toast" id="toast">Action successful!</div>
+
+        <div class="settings-bar">
+            <button class="settings-btn" id="fontSizeBtn" title="Adjust Font Size">A±</button>
+            <button class="settings-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode">☀️ Light Mode</button>
+        </div>
+
+        <header>
+            <h1>Dictionary App</h1>
+        </header>
+
+        <section class="search-wrapper">
+            <div class="input-group">
+                <input type="text" id="wordInput" placeholder="Look up a word..." autocomplete="off">
+                <button id="clearBtn" class="clear-btn" title="Clear input">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <button id="searchBtn" class="primary-btn">Search</button>
+            <button id="randomBtn" class="primary-btn secondary-btn" title="Word of the Day">🎲 Random</button>
+        </section>
+
+        <section class="results-section" id="resultArea">
+            <div class="empty-state">Type a word above to explore its meaning.</div>
+        </section>
+
+        <section class="history-section" id="historySection" style="display: none;">
+            <div class="history-header">
+                <div class="history-title">Recent Searches</div>
+                <button class="text-btn" id="clearHistoryBtn">Clear All</button>
+            </div>
+            <div class="history-tags" id="historyTags"></div>
+        </section>
+    </main>
+
+    <script>
+        const ui = {
+            input: document.getElementById('wordInput'),
+            clearBtn: document.getElementById('clearBtn'),
+            searchBtn: document.getElementById('searchBtn'),
+            randomBtn: document.getElementById('randomBtn'),
+            resultArea: document.getElementById('resultArea'),
+            historySection: document.getElementById('historySection'),
+            historyTags: document.getElementById('historyTags'),
+            clearHistoryBtn: document.getElementById('clearHistoryBtn'),
+            themeToggle: document.getElementById('themeToggleBtn'),
+            fontToggle: document.getElementById('fontSizeBtn'),
+            toast: document.getElementById('toast')
+        };
+
+        let searchHistory = [];
+        let savedWords = JSON.parse(localStorage.getItem('savedWords')) || [];
+        let currentAudio = null;
+        let isDarkMode = true;
+        let fontSizes = ['16px', '18px', '20px'];
+        let currentFontIndex = 0;
+
+        // Settings Listeners
+        ui.themeToggle.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('light-mode');
+            ui.themeToggle.innerText = isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode";
+        });
+
+        ui.fontToggle.addEventListener('click', () => {
+            currentFontIndex = (currentFontIndex + 1) % fontSizes.length;
+            document.documentElement.style.setProperty('--base-font-size', fontSizes[currentFontIndex]);
+        });
+
+        // Search Listeners
+        ui.searchBtn.addEventListener('click', () => handleSearch());
+        ui.randomBtn.addEventListener('click', fetchRandomWord);
+        
+        ui.input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSearch();
+        });
+
+        ui.input.addEventListener('input', () => {
+            ui.clearBtn.style.display = ui.input.value.length > 0 ? 'block' : 'none';
+        });
+
+        ui.clearBtn.addEventListener('click', () => {
+            ui.input.value = '';
+            ui.clearBtn.style.display = 'none';
+            ui.input.focus();
+        });
+
+        ui.clearHistoryBtn.addEventListener('click', () => {
+            searchHistory = [];
+            ui.historySection.style.display = 'none';
+            ui.historyTags.innerHTML = '';
+        });
+
+        // App Logic
+        async function fetchRandomWord() {
+            setLoadingState();
+            try {
+                const response = await fetch('https://random-word-api.herokuapp.com/word');
+                const data = await response.json();
+                handleSearch(data[0]);
+            } catch (error) {
+                renderError();
             }
         }
 
-        result.innerHTML=
-        `
-        <div class="word">${wordName}</div>
-        <div class="phonetic">${phonetic}</div>
+        async function handleSearch(wordToSearch = null) {
+            const word = wordToSearch || ui.input.value.trim();
+            if (!word) return;
 
-        <div class="part">
-        ${part}
-        </div>
+            if (wordToSearch) {
+                ui.input.value = word;
+                ui.clearBtn.style.display = 'block';
+            }
 
-        <div class="meaning">
-        ${definition}
-        </div>
+            setLoadingState();
 
-        <br>
-
-        <b>Example:</b>
-        ${example}
-
-        ${
-        audio ?
-        `<audio controls src="${audio}"></audio>`
-        :
-        ""
+            try {
+                const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                if (!response.ok) throw new Error('Word not found');
+                const data = await response.json();
+                renderResult(data[0]);
+                updateHistory(data[0].word);
+            } catch (error) {
+                renderError();
+            }
         }
-        `;
 
-        addHistory(wordName);
+        function renderResult(entry) {
+            const { word, phonetic, meanings, phonetics } = entry;
+            const primaryMeaning = meanings[0];
+            const primaryDef = primaryMeaning.definitions[0];
+            
+            const audioObj = phonetics.find(p => p.audio && p.audio.length > 0);
+            const audioUrl = audioObj ? audioObj.audio : '';
+            const cleanDef = primaryDef.definition.replace(/"/g, '&quot;');
+            const isSaved = savedWords.includes(word);
 
-    }
-    catch{
+            ui.resultArea.innerHTML = `
+                <div style="animation: slideUp 0.3s ease;">
+                    <div class="word-header">
+                        <div class="word-title-group">
+                            <div class="word-title">${word}</div>
+                            ${audioUrl ? `
+                                <button class="icon-btn" onclick="playAudio('${audioUrl}')" title="Listen">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                    </svg>
+                                </button>
+                            ` : ''}
+                        </div>
+                        <div class="action-group">
+                            <button class="icon-btn ${isSaved ? 'active' : ''}" id="saveBtn-${word}" onclick="toggleSave('${word}')" title="Save Word">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                            </button>
+                            <button class="icon-btn" onclick="copyText('${word}', '${cleanDef}')" title="Copy Definition">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            </button>
+                            <button class="icon-btn" onclick="shareWord('${word}')" title="Share Word">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="18" cy="5" r="3"></circle>
+                                    <circle cx="6" cy="12" r="3"></circle>
+                                    <circle cx="18" cy="19" r="3"></circle>
+                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    ${phonetic ? `
+                        <div class="phonetic">
+                            <span id="ipa-text">${phonetic}</span>
+                            <button class="toggle-phonetics-btn" onclick="toggleIPA()">Hide IPA</button>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="part-of-speech">${primaryMeaning.partOfSpeech}</div>
+                    <div class="definition">${primaryDef.definition}</div>
+                    ${primaryDef.example ? `<div class="example">"${primaryDef.example}"</div>` : ''}
+                </div>
+            `;
+        }
 
-        result.innerHTML=
-        `
-        <div style="color:#f87171">
-        Word not found or API unavailable.
-        </div>
-        `;
-    }
-}
+        // Global Utility Functions
+        window.playAudio = function(url) {
+            if (currentAudio) currentAudio.pause();
+            currentAudio = new Audio(url);
+            currentAudio.play();
+        };
 
-function addHistory(word){
+        window.copyText = function(word, definition) {
+            const textToCopy = `${word}: ${definition}`;
+            navigator.clipboard.writeText(textToCopy).then(() => showToast('Copied to clipboard!'));
+        };
 
-    if(history.includes(word))
-    return;
+        window.shareWord = function(word) {
+            const shareUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
+            navigator.clipboard.writeText(`Check out this word: ${word}\n${shareUrl}`).then(() => showToast('Share link copied!'));
+        };
 
-    history.unshift(word);
+        window.toggleSave = function(word) {
+            const btn = document.getElementById(`saveBtn-${word}`);
+            if (savedWords.includes(word)) {
+                savedWords = savedWords.filter(w => w !== word);
+                btn.classList.remove('active');
+                showToast('Removed from saved words.');
+            } else {
+                savedWords.push(word);
+                btn.classList.add('active');
+                showToast('Saved to vocabulary list!');
+            }
+            localStorage.setItem('savedWords', JSON.stringify(savedWords));
+        };
 
-    if(history.length>6){
-        history.pop();
-    }
+        window.toggleIPA = function() {
+            const ipa = document.getElementById('ipa-text');
+            const btn = document.querySelector('.toggle-phonetics-btn');
+            if (ipa.style.display === 'none') {
+                ipa.style.display = 'inline';
+                btn.innerText = 'Hide IPA';
+            } else {
+                ipa.style.display = 'none';
+                btn.innerText = 'Show IPA';
+            }
+        };
 
-    renderHistory();
-}
+        function showToast(message) {
+            ui.toast.innerText = message;
+            ui.toast.classList.add('show');
+            setTimeout(() => ui.toast.classList.remove('show'), 2500);
+        }
 
-function renderHistory(){
+        function updateHistory(word) {
+            searchHistory = searchHistory.filter(w => w !== word);
+            searchHistory.unshift(word);
+            if (searchHistory.length > 8) searchHistory.pop();
 
-    historyBox.innerHTML=
-    history.map(word=>
-    `<span onclick="searchWord('${word}')">${word}</span>`
-    ).join("");
-}
+            ui.historySection.style.display = 'block';
+            ui.historyTags.innerHTML = searchHistory
+                .map(w => `<span class="tag" onclick="handleSearch('${w}')">${w}</span>`)
+                .join('');
+        }
 
-</script>
+        function setLoadingState() {
+            ui.resultArea.innerHTML = `<div class="loading-state animate-pulse">Searching...</div>`;
+        }
 
+        function renderError() {
+            ui.resultArea.innerHTML = `
+                <div class="error-state">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 10px;">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p>We couldn't find definitions for that word.</p>
+                </div>
+            `;
+        }
+    </script>
 </body>
 </html>
